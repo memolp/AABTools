@@ -1,32 +1,44 @@
-﻿/*
- * Created by SharpDevelop.
- * User: qingf
- * Date: 2021/6/30
- * Time: 18:48
- * 
- * To change this template use Tools | Options | Coding | Edit Standard Headers.
- */
-using System;
-using System.Drawing;
+﻿using System;
 using System.Windows.Forms;
 using System.IO;
 
 namespace AndroidAppBundleTools
 {
 	/// <summary>
-	/// Description of SettingForm.
+	/// 项目配置对话框
 	/// </summary>
 	public partial class SettingForm : Form
 	{
+		public delegate void OnCreateProjectEventHandler(ProjectItem item);
+		
+		private ProjectItem _projectItem = null;
+		/// <summary>
+		/// 创建项目
+		/// </summary>
+		public OnCreateProjectEventHandler OnCreateProject = null;
+		/// <summary>
+		/// 默认构造函数，新建项目配置
+		/// </summary>
 		public SettingForm()
 		{
-			//
-			// The InitializeComponent() call is required for Windows Forms designer support.
-			//
 			InitializeComponent();
-			//
-			// TODO: Add constructor code after the InitializeComponent() call.
-			//
+		}
+		/// <summary>
+		/// 修改项目配置的构造函数
+		/// </summary>
+		/// <param name="item"></param>
+		public SettingForm(ProjectItem item)
+		{
+			InitializeComponent();
+			_projectItem = item;
+			ProjectNameInput.Text = item.ProjectName;
+			ProjectNameInput.ReadOnly = true;
+			ProjectAABInput.Text = item.ProjectAABPath;
+			_inputJavaSdk.Text = item.ProjectJDKPath;
+			_inputAdbPath.Text = item.ProjectADBPath;
+			_inputKSPath.Text = item.ProjectKeystore;
+			_inputKSAlias.Text = item.KeySAlias;
+			_inputKSPassword.Text = item.KeySPassword;
 		}
 		/// <summary>
 		/// 指定JAVA SDK的路径
@@ -48,7 +60,6 @@ namespace AndroidAppBundleTools
 					return;
 				}
 				_inputJavaSdk.Text = dlg.SelectedPath;
-				Const.Instance.JAVA_SDK_PATH = dlg.SelectedPath;
 			}
 		}
 		/// <summary>
@@ -71,7 +82,6 @@ namespace AndroidAppBundleTools
 					return;
 				}
 				_inputAdbPath.Text = dlg.SelectedPath;
-				Const.Instance.ADB_PATH = dlg.SelectedPath;
 			}
 		}
 		/// <summary>
@@ -97,7 +107,6 @@ namespace AndroidAppBundleTools
 					return;
 				}
 				_inputKSPath.Text = dlg.FileName;
-				Const.Instance.KEYSTORE_PAHT = dlg.FileName;
 			}
 		}
 		/// <summary>
@@ -107,25 +116,56 @@ namespace AndroidAppBundleTools
 		/// <param name="e"></param>
 		void OnSaveConfig(object sender, EventArgs e)
 		{
-			string ks_alias = _inputKSAlias.Text;
-			string ks_passwd = _inputKSPassword.Text;
-			Const.Instance.KEYSTORE_ALIAS = ks_alias;
-			Const.Instance.KEYSTORE_PASSWD = ks_passwd;
+			// 新建
+			if(_projectItem == null)
+			{
+				string projectName = ProjectNameInput.Text;
+				if(string.IsNullOrEmpty(projectName))
+				{
+					MessageBox.Show("请输入项目名称", "提示");
+					return;
+				}
+				if(Const.Instance.ProjectList.ContainsKey(projectName))
+				{
+					MessageBox.Show("输入的项目名称已经存在", "提示");
+					return;
+				}
+				_projectItem = new ProjectItem();
+				_projectItem.ProjectName = projectName;
+				_projectItem.ProjectAABPath = ProjectAABInput.Text;
+				_projectItem.ProjectJDKPath = _inputJavaSdk.Text;
+				_projectItem.ProjectADBPath = _inputAdbPath.Text;
+				_projectItem.ProjectAPKsPath = Guid.NewGuid().ToString();
+				_projectItem.ProjectKeystore = _inputKSPath.Text;
+				_projectItem.KeySAlias = _inputKSAlias.Text;
+				_projectItem.KeySPassword = _inputKSPassword.Text;
+				Const.Instance.ProjectList.Add(projectName, _projectItem);
+				if(OnCreateProject != null) OnCreateProject.Invoke(_projectItem);
+			}else
+			{
+				_projectItem.ProjectAABPath = ProjectAABInput.Text;
+				_projectItem.ProjectJDKPath = _inputJavaSdk.Text;
+				_projectItem.ProjectADBPath = _inputAdbPath.Text;
+				_projectItem.ProjectKeystore = _inputKSPath.Text;
+				_projectItem.KeySAlias = _inputKSAlias.Text;
+				_projectItem.KeySPassword = _inputKSPassword.Text;
+			}
 			Const.SaveData();
 			this.Close();
 		}
-		/// <summary>
-		/// 窗口加载的时候设置默认数据
-		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
-		void OnFormLoad(object sender, EventArgs e)
+
+		void OnSelectAABRootPath(object sender, EventArgs e)
 		{
-			_inputJavaSdk.Text = Const.Instance.JAVA_SDK_PATH;
-			_inputAdbPath.Text = Const.Instance.ADB_PATH;
-			_inputKSPath.Text = Const.Instance.KEYSTORE_PAHT;
-			_inputKSAlias.Text = Const.Instance.KEYSTORE_ALIAS;
-			_inputKSPassword.Text = Const.Instance.KEYSTORE_PASSWD;
+			FolderBrowserDialog folder = new FolderBrowserDialog();
+			folder.Description = "选则项目AAB包的根路径，方便每次快速定位";
+			folder.ShowNewFolderButton = false;
+			if(DialogResult.OK == folder.ShowDialog())
+			{
+				if(Directory.Exists(folder.SelectedPath))
+				{
+					ProjectAABInput.Text = folder.SelectedPath;
+				}
+			}
 		}
 	}
 }

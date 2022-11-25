@@ -8,11 +8,51 @@
  */
 using System;
 using System.IO;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace AndroidAppBundleTools
 {
+	/// <summary>
+	/// 每个项目的配置数据存储结构
+	/// </summary>
+	[Serializable]
+	public class ProjectItem
+	{
+		/// <summary>
+		/// 项目名称
+		/// </summary>
+		public string ProjectName = "";
+		/// <summary>
+		/// 项目的JDK路径，可以不设置
+		/// </summary>
+		public string ProjectJDKPath = "";
+		/// <summary>
+		/// 项目的ADB路径，可以不设置
+		/// </summary>
+		public string ProjectADBPath = "";
+		/// <summary>
+		/// 项目的Keystore文件
+		/// </summary>
+		public string ProjectKeystore = "";
+		/// <summary>
+		/// keystore的alias
+		/// </summary>
+		public string KeySAlias = "";
+		/// <summary>
+		/// keystore的alias的密码
+		/// </summary>
+		public string KeySPassword = "";
+		/// <summary>
+		/// 这个随机生成，并固定
+		/// </summary>
+		public string ProjectAPKsPath = "";
+		/// <summary>
+		/// 项目的aab路径，方便不用每次切换
+		/// </summary>
+		public string ProjectAABPath = "";
+	}
 	/// <summary>
 	/// Description of Const.
 	/// </summary>
@@ -23,6 +63,10 @@ namespace AndroidAppBundleTools
 		/// 缓存应用数据
 		/// </summary>
 		public static string LOCAL_DATA_PATH = "app.dat";
+		/// <summary>
+		/// 项目列表
+		/// </summary>
+		public Dictionary<string, ProjectItem> ProjectList = new Dictionary<string, ProjectItem>();
 		/// <summary>
 		/// 单例对象
 		/// </summary>
@@ -68,85 +112,5 @@ namespace AndroidAppBundleTools
 				return _instance;
 			}
 		}
-		
-		private string _java_sdk_path = string.Empty;
-		/// <summary>
-		/// 返回JAVA SDK的路径
-		/// </summary>
-		public string JAVA_SDK_PATH
-		{
-			set
-			{
-				_java_sdk_path = value;
-			}
-			get
-			{
-				return _java_sdk_path;
-			}
-		}
-		private string _adb_path = string.Empty;
-		/// <summary>
-		/// 返回ADB的路径
-		/// </summary>
-		public string ADB_PATH
-		{
-			set
-			{
-				_adb_path = value;
-			}
-			get
-			{
-				return _adb_path;
-			}
-		}
-		
-		private string _key_store_path = string.Empty;
-		/// <summary>
-		/// keystore路径
-		/// </summary>
-		public string KEYSTORE_PAHT
-		{
-			set
-			{
-				_key_store_path = value;
-			}
-			get
-			{
-				return _key_store_path;
-			}
-		}
-		
-		private string _key_store_alias = string.Empty;
-		/// <summary>
-		/// keystore 别名
-		/// </summary>
-		public string KEYSTORE_ALIAS
-		{
-			set
-			{
-				_key_store_alias = value;
-			}
-			get
-			{
-				return _key_store_alias;
-			}
-		}
-		
-		private string _key_store_passwd = string.Empty;
-		/// <summary>
-		/// keystore 密码
-		/// </summary>
-		public string KEYSTORE_PASSWD
-		{
-			set
-			{
-				_key_store_passwd = value;
-			}
-			get
-			{
-				return _key_store_passwd;
-			}
-		}
-		
 	}
 }

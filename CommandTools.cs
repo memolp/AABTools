@@ -86,14 +86,9 @@ namespace AndroidAppBundleTools
 		/// <param name="aabfilePath"></param>
 		/// <param name="apksfilePath"></param>
 		/// <returns></returns>
-		public static bool BuildApks(string aabfilePath, string apksfilePath)
+		public static bool BuildApks(string aabfilePath, string apksfilePath, string keystore, string alias, string password)
 		{
-			string cmd = string.Format(BUILD_APKS_CMD, 
-			                           aabfilePath,
-			                           apksfilePath, 
-			                           Const.Instance.KEYSTORE_PAHT, 
-			                           Const.Instance.KEYSTORE_ALIAS, 
-			                           Const.Instance.KEYSTORE_PASSWD);
+			string cmd = string.Format(BUILD_APKS_CMD, aabfilePath, apksfilePath, keystore, alias, password);
 			string result = string.Empty;
 			if(!CommandTools.execute_cmd(cmd, out result))
 			{
